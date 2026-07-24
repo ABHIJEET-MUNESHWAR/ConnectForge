@@ -1,0 +1,81 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/connectforge-types",
+    "crates/connectforge-resilience",
+    "crates/connectforge-core",
+    "crates/connectforge-infra",
+    "crates/connectforge-api",
+    "crates/connectforge-node",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MIT"
+repository = "https://github.com/ABHIJEET-MUNESHWAR/ConnectForge"
+authors = ["Abhijeet Ashok Muneshwar <openingknots@gmail.com>"]
+
+[workspace.dependencies]
+# async runtime
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+tokio-stream = { version = "0.1", features = ["sync"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# serialization
+serde = { version = "1", features = ["derive", "rc"] }
+serde_json = "1"
+
+# errors
+thiserror = "2"
+anyhow = "1"
+
+# graphql + web
+async-graphql = { version = "7", features = ["chrono"] }
+async-graphql-axum = "7"
+axum = { version = "0.8", features = ["ws", "macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "timeout", "cors"] }
+
+# resilience / concurrency
+governor = "0.6"
+dashmap = "6"
+parking_lot = "0.12"
+
+# observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+metrics = "0.24"
+metrics-exporter-prometheus = "0.16"
+
+# utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive", "env"] }
+dotenvy = "0.15"
+hdrhistogram = "7"
+
+# testing / bench
+mockall = "0.13"
+proptest = "1"
+criterion = { version = "0.5", features = ["async_tokio"] }
+tempfile = "3"
+
+# internal crates
+connectforge-types = { path = "crates/connectforge-types" }
+connectforge-resilience = { path = "crates/connectforge-resilience" }
+connectforge-core = { path = "crates/connectforge-core" }
+connectforge-infra = { path = "crates/connectforge-infra" }
+connectforge-api = { path = "crates/connectforge-api" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.bench]
+debug = true
+strip = false

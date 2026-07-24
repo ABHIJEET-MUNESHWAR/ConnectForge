@@ -1,0 +1,27 @@
+[package]
+name = "connectforge-core"
+version = { workspace = true }
+edition = { workspace = true }
+rust-version = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+connectforge-types = { workspace = true }
+connectforge-resilience = { workspace = true }
+async-trait = { workspace = true }
+dashmap = { workspace = true }
+parking_lot = { workspace = true }
+metrics = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+futures = { workspace = true }
+chrono = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+mockall = { workspace = true }
+proptest = { workspace = true }
+
+[lints.rust]
+unsafe_code = "forbid"

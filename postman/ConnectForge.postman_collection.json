@@ -1,0 +1,131 @@
+{
+  "info": {
+    "name": "ConnectForge",
+    "description": "GraphQL API for the ConnectForge connector SDK (source/sink connectors with checkpointing, at-least-once delivery, and a dead-letter queue) on a commit log. All GraphQL requests POST to {{baseUrl}}/graphql.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" }
+  ],
+  "item": [
+    {
+      "name": "Create Topic",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation CreateTopic($name: String!, $partitions: Int!) {\n  createTopic(name: $name, partitions: $partitions, segmentMaxRecords: 1024, maxRecords: 1000000) {\n    name\n    partitions\n    segmentMaxRecords\n    maxRecords\n  }\n}",
+            "variables": "{\n  \"name\": \"orders\",\n  \"partitions\": 4\n}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Produce Records",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation Produce($topic: String!, $records: [ProduceInput!]!) {\n  produce(topic: $topic, records: $records) {\n    baseOffset\n    lastOffset\n    count\n    truncatedTo\n  }\n}",
+            "variables": "{\n  \"topic\": \"orders\",\n  \"records\": [\n    { \"key\": \"user-1\", \"payload\": \"placed order 42\" },\n    { \"payload\": \"system event\" }\n  ]\n}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Fetch Records",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Fetch($topic: String!, $partition: Int!, $from: Int!, $max: Int!) {\n  fetch(topic: $topic, partition: $partition, from: $from, max: $max) {\n    records { offset key payload timestamp }\n    nextOffset\n    highWatermark\n  }\n}",
+            "variables": "{\n  \"topic\": \"orders\",\n  \"partition\": 0,\n  \"from\": 0,\n  \"max\": 100\n}"
+          }
+        }
+      }
+    },
+    {
+      "name": "List Topics",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query { topics { name partitions segmentMaxRecords maxRecords } }",
+            "variables": "{}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Stats",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query { stats { topics partitions records segments producedTotal fetchedTotal } }",
+            "variables": "{}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Connectors",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query { connectors { id kind guarantee running processed deadLettered checkpoint } }",
+            "variables": "{}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Dead Letters",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] },
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query { deadLetters { connector topic partition offset payload reason attempts failedAt } }",
+            "variables": "{}"
+          }
+        }
+      }
+    },
+    {
+      "name": "Health - Live",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/health/live", "host": ["{{baseUrl}}"], "path": ["health", "live"] }
+      }
+    },
+    {
+      "name": "Metrics",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/metrics", "host": ["{{baseUrl}}"], "path": ["metrics"] }
+      }
+    }
+  ]
+}

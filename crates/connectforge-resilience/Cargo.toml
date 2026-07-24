@@ -1,0 +1,20 @@
+[package]
+name = "connectforge-resilience"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Reusable resilience primitives: timeout, retry, circuit breaker, rate limiter, bulkhead"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+tokio = { workspace = true }
+thiserror = { workspace = true }
+parking_lot = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt", "test-util", "time"] }

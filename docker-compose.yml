@@ -1,0 +1,48 @@
+services:
+  connectforge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: connectforge:latest
+    container_name: connectforge
+    ports:
+      - "8080:8080"
+    environment:
+      CONNECTFORGE_ADDR: 0.0.0.0:8080
+      CONNECTFORGE_DATA_DIR: /data
+      RUST_LOG: info,connectforge=debug
+    volumes:
+      - connectforge-data:/data
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: connectforge-prometheus
+    profiles: ["monitoring"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - connectforge
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: connectforge-grafana
+    profiles: ["monitoring"]
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  connectforge-data:
