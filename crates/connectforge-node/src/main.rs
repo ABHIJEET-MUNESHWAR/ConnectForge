@@ -181,7 +181,12 @@ async fn demo(args: DemoArgs) -> anyhow::Result<()> {
     let conn_store: ConnStore = Arc::new(store);
 
     // Source stage: ingest `records` synthetic records into partition 0.
-    let source = Arc::new(GeneratorSource::new(args.records, 500, args.keys, 0x00C0_FFEE));
+    let source = Arc::new(GeneratorSource::new(
+        args.records,
+        500,
+        args.keys,
+        0x00C0_FFEE,
+    ));
     let source_rt = SourceRuntime::new(
         ConnectorId::new("demo-source").map_err(|e| anyhow::anyhow!("{e}"))?,
         topic.clone(),
@@ -191,7 +196,12 @@ async fn demo(args: DemoArgs) -> anyhow::Result<()> {
     );
 
     let start = Instant::now();
-    while source_rt.run_once().await.map_err(|e| anyhow::anyhow!("source: {e}"))? > 0 {}
+    while source_rt
+        .run_once()
+        .await
+        .map_err(|e| anyhow::anyhow!("source: {e}"))?
+        > 0
+    {}
     let produced = source_rt.produced();
 
     // Sink stage: deliver at-least-once, dead-lettering every `fail_every`-th
